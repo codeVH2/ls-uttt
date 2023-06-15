@@ -1,6 +1,6 @@
-import React from 'react';
+import { possibilities } from '../Possibilities.js';
 import Board from './Board.js';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 
 
 function UltimateBoard() {
@@ -11,7 +11,8 @@ function UltimateBoard() {
 
   for(let i = 0; i < 9; i++){
     boards[i] = <Board 
-    isWon = {doneBoards[i] === 1 || doneBoards[i] === 2}
+    isWonX = {doneBoards[i] === 1} //isWonX = true se o board i foi ganho por X
+    isWonO = {doneBoards[i] === 2} //isWonO = true se o board i foi ganho por O
     doneBoards = {doneBoards}	
     setDoneBoards = {setDoneBoards}
     player = {player}
@@ -19,8 +20,12 @@ function UltimateBoard() {
     key={i}
     index = {i}
     currentBoard = {currentBoard}
-    setCurrentBoard = {setCurrentBoard} />
+    setCurrentBoard = {setCurrentBoard}
+    checkWinnerUltimate />
   }
+
+ 
+
 
   return (
     <div className="ultimate-board">

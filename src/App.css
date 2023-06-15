@@ -1,11 +1,10 @@
 .App {
   text-align: center;
-  width: 100vw;
-  height: 100vw;
+ 
+  padding-top: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
-  
 }
 
 body{
@@ -24,8 +23,9 @@ body{
 
 
 .board{
-  width: 500px;
-  height: 500px;
+  padding:10px;
+  width: 200px;
+  height: 200px;
   background-color: grey;
   border: 1px solid black;
 }
@@ -50,11 +50,16 @@ body{
 
 .square:active{ /* when clicked */
   background-color: #e6e6e6;
-  transition: 0.5ms;
+  transition: 1ms;
+  
 }
 
-.won{
-  background-color: #e6e6e6;
+.wonX{
+  background-color: red;
+  transition: 0.5ms;
+}
+.wonO{
+  background-color: blue;
   transition: 0.5ms;
 }
 

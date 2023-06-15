@@ -12,11 +12,11 @@ function Board(props) {
   //----------------------------------------------------------------------------------------------------------//
   useEffect(() => {
     //useEffect() é executado sempre que o valor de board é alterado
-    let res = checkWinner(board); //res = 0 jogo incompleto ou empate, 1 Alguém ganhou, 2 houve empate
+    let res = checkWinner(board); //res = 0 jogo incompleto, 1 Alguém ganhou, 2 houve empate
     let Boards = props.doneBoards;
     if (res === 1) {
       //Se alguém ganhou
-      Boards[props.index] = props.player === "X" ? 1 : 2; //Se o player for "X", Boards[props.index] = 1, se não, Boards[props.index] = 2
+      Boards[props.index] = props.player === "X" ? 1 : 2; // 1 = ganhou X, 2 = ganhou O
       console.log(Boards);
     } else if (res === 2) {
       //Se houve empate
@@ -24,7 +24,7 @@ function Board(props) {
     }
 
     props.setDoneBoards(Boards); //Atualiza o array doneBoards
-    console.log(res);
+   
 
     if (props.player === "X") {
       //Se o player for "X", muda para "O", se não, muda para "X"
@@ -32,6 +32,10 @@ function Board(props) {
     } else {
       props.setPlayer("X");
     }
+
+    checkWinnerUltimate();
+    
+   
   }, [board]);
 
   //----------------------------------------------------------------------------------------------------------//
@@ -66,7 +70,11 @@ function Board(props) {
           value === "" &&
           props.currentBoard === props.index
         ) {
-          //Se o valor do array for vazio, preenche com X ou O
+          //Se o valor do array for vazio, preenche com X ou O~
+          // proximo minitab é o dsuqartesquare
+          if (props.doneBoards[square] !== 0) 
+          return props.player;
+         
           props.setCurrentBoard(square); // faz com que se jogue no board do square jogado
           return props.player;
         }
@@ -122,6 +130,29 @@ function Board(props) {
   };
 
   //----------------------------------------------------------------------------------------------------------//
+const checkWinnerUltimate = () =>{
+    // Verificar se alguma possibilidade de vitória foi alcançada
+for (const possibility of possibilities) {
+const [a, b, c] = possibility;
+if (
+  props.doneBoards[a] !== 0 && props.doneBoards[a] !== 3 && 
+  props.doneBoards[a] === props.doneBoards[b] &&
+  props.doneBoards[a] === props.doneBoards[c]
+) {
+  console.log("ganhou" + props.doneBoards[a]);
+  return props.doneBoards[a]; // Retorna o jogador que ganhou
+}
+}
+
+// Verificar se ocorreu um empate
+if (props.doneBoards.every(board => board !== 0)) {
+return 3; // Retorna 3 para indicar empate
+}
+console.log("ainda n ganhou");
+return 0; // Retorna 0 se ninguém ganhou ainda
+}
+
+//----------------------------------------------------------------------------------------------------------//
 
   for (let i = 0; i < 9; i++) {
     Squares[i] = (
@@ -133,13 +164,17 @@ function Board(props) {
       />
     );
   }
+  
+
 
   return (
     <div
       onClickCapture={handleClickCaptureCard}
-      className={`board ${props.isWon ? "won" : ""} ${
-        props.currentBoard === props.index ? "boardSelected" : ""
-      } ${props.doneBoards[props.index] !== 0 ? "boardBlock" : ""}`}
+      className={`board
+      ${props.isWonX ? "wonX" : ""}  
+      ${props.isWonO ? "wonO" : ""} 
+      ${props.currentBoard === props.index ? "boardSelected" : ""}
+       ${props.doneBoards[props.index] !== 0 ? "boardBlock" : ""}`}
     >
       {Squares}
     </div>
