@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Square from "./Square.js";
 import "../App.css";
 import { possibilities } from "../Possibilities";
+import Forms from "./Forms.js";
 
 function Board(props) {
   const [board, setBoard] = useState(["", "", "", "", "", "", "", "", ""]);
@@ -11,13 +12,11 @@ function Board(props) {
 
   //----------------------------------------------------------------------------------------------------------//
   useEffect(() => {
-    //useEffect() é executado sempre que o valor de board é alterado
     let res = checkWinner(board); //res = 0 jogo incompleto, 1 Alguém ganhou, 2 houve empate
     let Boards = props.doneBoards;
     if (res === 1) {
       //Se alguém ganhou
       Boards[props.index] = props.player === "X" ? 1 : 2; // 1 = ganhou X, 2 = ganhou O
-      console.log(Boards);
     } else if (res === 2) {
       //Se houve empate
       Boards[props.index] = 3;
@@ -32,10 +31,18 @@ function Board(props) {
     } else {
       props.setPlayer("X");
     }
-
+    let unfinishedBoards = [];
+    if(props.doneBoards[props.currentBoard] !== 0){
+      
+      for(let i = 0; i < props.doneBoards.length; i++){
+        if(props.doneBoards[i] === 0) unfinishedBoards.push(props.doneBoards[i]);
+      }
+      // let board = unfinishedBoards[getRandomInt(unfinishedBoards.length - 1)];
+      let board = unfinishedBoards[2];
+      props.setCurrentBoard(board);
+    }
     checkWinnerUltimate();
-    
-   
+
   }, [board]);
 
   //----------------------------------------------------------------------------------------------------------//
@@ -45,19 +52,35 @@ function Board(props) {
     if (result.state !== "none") {
       //Se o resultado for diferente de "none", mostra o resultado
       alert(`Game Finished! Winning Player: ${result.winner} `);
-      restartGame();
+      restartGame();  
     }
   }, [result]);
 
   //----------------------------------------------------------------------------------------------------------//
 
-  const handleClickCaptureCard = (event) => {
-    //função tirada da ficha 11, faz com que o tabuleiro não seja jogável se o tabuleiro já estiver feito
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+
+
+  
+  const handleClickCaptureCard = async (event) => {
+    
+
+    // função tirada da ficha 11, faz com que o tabuleiro não seja jogável se o tabuleiro já estiver feito
     if (props.doneBoards[props.index] !== 0) {
       event.stopPropagation();
+      if (props.doneBoards[props.currentBoard] !== 0) {
+
+        let unfinishedBoards = [];
+        for (let i = 0; i < props.doneBoards.length; i++) {
+          if (props.doneBoards[i] === 0) unfinishedBoards.push(props.doneBoards[i]);
+        }
+        props.setCurrentBoard(unfinishedBoards[getRandomInt(unfinishedBoards.length - 1)]);
+  
+      }
     }
   };
-
   //----------------------------------------------------------------------------------------------------------//
 
   const chooseSquare = (square) => {
@@ -75,7 +98,9 @@ function Board(props) {
           if (props.doneBoards[square] !== 0) 
           return props.player;
          
-          props.setCurrentBoard(square); // faz com que se jogue no board do square jogado
+          props.setCurrentBoard(square); // faz com que se jogue no board do square jogado~
+          
+
           return props.player;
         }
         return value;
@@ -125,31 +150,57 @@ function Board(props) {
   //----------------------------------------------------------------------------------------------------------//
 
   const restartGame = () => {
-    setBoard(["", "", "", "", "", "", "", "", ""]);
+    props.setDoneBoards(["", "", "", "", "", "", "", "", ""]);
+    for (let i = 0; i < 9; i++) {
+      Squares[i] = (
+        <Square
+          value={""}
+          key={i}
+          isSelected={props.currentBoard === props.index}
+          chooseSquare={() => chooseSquare(i)}
+        />
+      );
+    }
     props.setPlayer("O");
   };
 
   //----------------------------------------------------------------------------------------------------------//
 const checkWinnerUltimate = () =>{
     // Verificar se alguma possibilidade de vitória foi alcançada
-for (const possibility of possibilities) {
-const [a, b, c] = possibility;
-if (
-  props.doneBoards[a] !== 0 && props.doneBoards[a] !== 3 && 
-  props.doneBoards[a] === props.doneBoards[b] &&
-  props.doneBoards[a] === props.doneBoards[c]
-) {
-  console.log("ganhou" + props.doneBoards[a]);
-  return props.doneBoards[a]; // Retorna o jogador que ganhou
-}
-}
+    for (const possibility of possibilities) {
+    const [a, b, c] = possibility;
+    if (props.doneBoards[a] !== 0 && props.doneBoards[a] !== 3 && 
+      props.doneBoards[a] === props.doneBoards[b] &&
+      props.doneBoards[a] === props.doneBoards[c]
+    ) {
+      // Player has won
+      const winner = props.doneBoards[a];
+      const popup = document.getElementById("popup");
+      const popupMessage = document.getElementById("popup-message");
+  
+      // Set the message in the popup based on the winner
+      popupMessage.textContent = "Player " + winner + " won!";
+  
+      // Show the popup
+      popup.style.display = "block";
+  
+      // Play Again button click handler
+      const playAgainBtn = document.getElementById("play-again-btn");
+      playAgainBtn.addEventListener("click", () => {
+        restartGame()
+        popup.style.display = "none";
+      });
+  
+      // return winner; // Returns the player who won
+      return props.doneBoards[a]; // Retorna o jogador que ganhou
+    }
+    }
 
-// Verificar se ocorreu um empate
-if (props.doneBoards.every(board => board !== 0)) {
-return 3; // Retorna 3 para indicar empate
-}
-console.log("ainda n ganhou");
-return 0; // Retorna 0 se ninguém ganhou ainda
+    // Verificar se ocorreu um empate
+    if (props.doneBoards.every(board => board !== 0)) {
+    return 3; // Retorna 3 para indicar empate
+    }
+    return 0; // Retorna 0 se ninguém ganhou ainda
 }
 
 //----------------------------------------------------------------------------------------------------------//
@@ -168,17 +219,24 @@ return 0; // Retorna 0 se ninguém ganhou ainda
 
 
   return (
-    <div
-      onClickCapture={handleClickCaptureCard}
-      className={`board
-      ${props.isWonX ? "wonX" : ""}  
-      ${props.isWonO ? "wonO" : ""} 
-      ${props.currentBoard === props.index ? "boardSelected" : ""}
-       ${props.doneBoards[props.index] !== 0 ? "boardBlock" : ""}`}
-    >
-      {Squares}
-    </div>
+    <>
+      {props.currentBoard === props.index && (
+        <div className="currentPlayer">Current Player: {props.player}</div>
+      )}
+      <div
+        onClickCapture={handleClickCaptureCard}
+        className={`board
+          ${props.isWonX ? "wonX" : ""}  
+          ${props.isWonO ? "wonO" : ""} 
+          ${props.isWonDraw ? "wonDraw" : ""}
+          ${props.currentBoard === props.index ? "boardSelected" : ""}
+          ${props.doneBoards[props.index] !== 0 ? "boardBlock" : ""}`}
+      >
+        {Squares}
+      </div>
+    </>
   );
+  
 }
 
 export default Board;
